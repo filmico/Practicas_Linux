@@ -1,0 +1,825 @@
+Guia de Re-instalacion Avanzada
+-------------------------------
+http://astr.tohoku.ac.jp/~akhlaghi/newlinux.html
+
+
+Guia de Centos 5
+----------------
+https://www.centos.org/docs/5/
+
+https://wiki.centos.org/Manuals/ReleaseNotes/CentOS6.0?highlight=%28%28Manuals%7CReleaseNotes%7CCentOS6.0%29%29
+
+
+Red Hat 6.8
+-----------
+https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/6.8_release_notes/
+
+
+Comandos
+---------
+0) Manual
+
+  man cat   (nos muestra el manual del cat)
+
+1) Permisos de ejecucion
+
+	chmod +x filename.ext
+
+2) Descomprimir archivos tar.gz
+
+   tar xvzf file.tar.gz
+
+3) Ver la version del desktop que estamos ejecutando (GNOME/KDE)
+
+   printf 'Desktop: %s\nSession: %s\n' "$XDG_CURRENT_DESKTOP" "$GDMSESSION"
+
+
+4) Secuencia de Arranque
+	- Algunos pasos de bajo nivel
+	- Bootloader (Con seleccion del OS de arranque)
+	- /sbin/init  (El promer programa que se corre)
+
+5) Metodos de carga de scrips en el arranque
+
+	Startup Alternatives: 
+
+	A) Upstart o System V (sistema viejo y presente hasta RHEL 6)
+
+		Developed by Ubuntu and first included in 2006
+		Adopted in Fedora 9 (in 2008) and in RHEL 6 and its clones.	
+
+	B) systemd (nuevo sistema de carga en paralelo y mas rapido)
+
+		Adopted by Fedora first (in 2011)
+		Adopted by RHEL 7 and SUSE 
+		Replaced Upstart in Ubuntu 16.04
+
+6) Tipos de formatos
+
+	Conventional disk filesystems: ext2, ext3, ext4, XFS, Btrfs, JFS, NTFS, etc.
+	Flash storage filesystems: ubifs, JFFS2, YAFFS, etc.
+	Database filesystems
+	Special purpose filesystems: procfs, sysfs, tmpfs, debugfs, etc.	
+
+
+ 							Windows			Linux
+ 							-------         ---------
+	Partition				Disk1			/dev/sda1
+	Filesystem type			NTFS/VFAT		EXT3/EXT4/XFS/BTRFS...
+	Mounting Parameters		DriveLetter		MountPoint
+	Base Folder for OS 		C:\				/
+
+
+7) Puntos de montaje
+
+	/media
+	/run/media (en los nuevos kernels)	
+
+8) Script de instalacion automatizado 
+	En Fedora (RHEL) se llama Kickstart
+
+9) Interfaz grafica
+	Para lanzarla desde la consola corremos el comando: startx	
+
+	- gnome-tweak-tool  para customizar mas el desktop
+
+	En consola tipear: yum install gnome-tweak-tool
+
+10) Tomar el control en consola como root
+
+	su
+
+11) Cambio de consolas y modo grafico
+
+	Ctrl + Alt + F1 (X11 Interfaz grafica)
+	Ctrl + Alt + F2-F7  Consolas
+
+12) Carpetas de los usuarios
+	
+	/home/usrName
+
+13) Mostrar archivos ocultos y otros tips del explorador de archivos
+
+	Podemos abrirlo desde consola tipeando: nautilus
+
+    Ctrl + h hidden view
+    Ctrl + 1 Icon view
+    Ctrl + 2 List vire
+    Ctrl + f Search
+    Ctrl + l Location
+
+14) Ubicacion de la papelera
+
+	.local/share/Trash/files/
+
+	.local refiere a un directorio oculto del home delusuario. 
+	Tenemos que apretar Ctrl + h  para ver los archivos ocultos y ver el .local
+
+15) Ubicacion de la data del Linux
+
+	System -> About	this computer
+
+16) Archivo de configuracion del X11
+
+	/etc/X11/xorg.conf
+
+
+17) Ubicacion de la instalacion de add-ons de las apps
+
+	/etc/opt
+
+18) Ubicacion de los comandos
+
+	/bin  				Ejecutables por cualquier usuario
+	/sbin 				Ejecutables para la administracion del sistema (root)  binarios para booteo, restore, recover, repair
+	/usr/sbin  			Ejecutables para la administracion del sistema (root)
+	/usr/local/sbin		Ejecutables para la administracion del sistema (root)
+
+19) Installing and Updating Software  (Red Hat Package Manager - RPM)
+
+	YUM -> RPM-Installer -> Fedora Family
+
+	yum (Yellowdog Updater, Modified)
+
+	PackageKit is the default interface in Fedora
+
+	A) Arriba a la derecha System Preferences
+	B) Add / Remove Software
+
+	Tambien podemos ir a la izquierda a System -> Administration -> Add-Remove Software
+
+
+20) Comandos
+
+	a) cat    	muestra un archivo
+		eg: cat /etc/resolv.conf
+	b) head 	muestra el principio de un archivo
+		eg: head -n 2 /etc/resolv.conf
+
+	Comandos con Pipes 
+	-------------------
+
+	(Output del 1ro es el input del segundo y asi sucesivamente)
+
+	Para tipear el simbol de pipe | usamos (shift + \)
+
+	c) eg: man cat | head -n 20
+
+	- muestra el manual de cat y se lo manda como entrada
+	al comando head que a su vez tiene el parametro -n para mostrar las primeras 20 lineas
+
+	d) tail 	muestra el final de un archivo
+
+	e) grep		busca dentro de un archivo y permite expresiones regulares e infinidad de cosas
+
+	Buscar dentro del las 10 primeras lineas de resolv.conf la palabra search
+
+	eg: head /etc/resolv.conf | grep search   
+
+21) sudo (Convertir el usuario en Super User) OPCION 1
+
+	a) Ir a la consola y fijarse el nombre del usuario  
+	   Supongamos que el usuario es filmico  [filmico@localhost ~]$ 
+
+    b) cambiamos al usuario root
+
+       su
+
+	c) Debemos crear un archivo de permisos para el usuario filmico. 
+	   Para ello tipeamos:
+
+		echo "filmico ALL=(ALL) ALL" > /etc/sudoers.d/filmico
+
+	    Esto agrega lo que esta entre comillas al archivo filmico ubicado en /etc/sudoers.d
+
+    d) Por ultimo, debemos cambiar los permisos del archivo creado
+
+       chmod 440 /etc/sudoers.d/filmico
+
+    e) Podemos verificar que el archivo esta ahi tipeando:
+
+       cat /etc/sudoers.d/filmico
+
+   Se explica mas en el punto 30)
+
+21.1) sudo (Convertir el usuario en Super User) OPCION 2
+
+	$ sudo visudo -f /etc/sudoers
+
+	- Vamos a encontrar una linea que dice:
+
+	## Allow root to run any commands anywhere
+	root    ALL=(ALL)       ALL
+
+	Esto indica que root puede acceder a Todas las maquinas y ejecutar todos los comandos como todos los usuarios
+
+	Tambien existe el caso de permisos a usuarios de un grupo y se indican con un simbolo %
+
+	## Allows people in group wheel to run all commands
+	%wheel        ALL=(ALL)       ALL
+
+	Si observamos, existe una directiva donde el simbolo # no funciona como comentario y permite agregar directivas de permisos desde un archivo. Este archivo se llama sudoers.d y se encuentra en /etc/  Esto es lo que se explico en el paso anterior 21)
+
+	## Read drop-in files from /etc/sudoers.d (the # here does not mean a comment)
+	#includedir /etc/sudoers.d
+
+	- Supongamos que tenemos un grupo llamado admin. Para darle permisos de usar sudo a los admins escribiriamos.
+
+	%admin ALL=(ALL) ALL
+
+	Lo que sigue es un ejemplo largo pero vale la pena para entender mas de los permisos
+	====================================================================================
+
+	Vamos a ver el uso de los alias para los sudoers.
+
+	- Supongamos que tenemos el siguiente archivo
+
+	/etc/sudoers.d/student.tmp
+
+	# Allow specific students to execute network applications
+	Cmd_Alias	CAPTURE = /usr/sbin/tcpdump
+	Cmd_Alias	NETWORK = /sbin/ifconfig, /sbin/ifdown
+	Cmd_Alias	WLAN = /sbin/iwconfig, /sbin/iwevent
+	Cmd_Alias	NETALL = CAPTURE, NETWORK, WLAN
+	%netadmin ALL=NETALL
+
+	- Todos los usuarios (ALL) en el grupo netadmin, obtienen los permisos del alias NETALL
+	- A su vez, NETALL contiene los tres alias CAPTURE, NETWORK y WLAN que a su vez contiene
+	  las rutas a los ejecutables permitidos y es lo que finalmente termina heredando el 
+	  grupo %netadmin
+
+	- Este archivo /etc/sudoers.d/student.tmp debe ser agregado como un include en /etc/sudoers
+
+	#includedir /etc/sudoers.d/student.tmp
+
+
+22) Apagar y encender GUI
+
+	Apagar: 	sudo telinit 3       
+	Encender: 	sudo telinit 5
+
+
+23) Conectarse via ssh
+
+	ssh username@remote-server.com
+
+24) Apagar y Reiniciar OS
+
+	shutdown -h now   (h de halt)	
+	shutdown -r now   (h de reboot)	
+
+	Para apagar dando aviso de apagado y poniendo un tiempo usar:
+
+	sudo shutdown -h 10:00 "Shutting down for scheduled maintenance."
+
+	Tambien podemos usar $ poweroff   y    $ halt
+
+25) Ubicando Programas
+
+	Dependiendo de la distro, los programas pueden estar en varias ubicaciones:
+
+	/bin, /usr/bin, /sbin, /usr/sbin directories, or under /opt
+
+	Supongamos que queremos saber donde esta el firefox:
+
+	$ which firefox
+
+	/usr/bin/firefox
+
+	Si wich no funciona podemos usar whereis que hace una busqueda amplia incluyendo paquetes
+
+	$ whereis firefox
+
+26) Directorio Home y comando cd
+
+	Por default, la distro Scientific abre la consola en el $HOME
+
+	lo podemos verificar usando el comando ls o viendo que a la izquierda esta el simbolo ~
+
+    echo $HOME   (Ubicacion del $HOME)
+    cd ~ o cd    (cambia al directorio $HOME)
+    pwd          (present working directory  /home/filmico)
+    cd ..        (Sube al padre)
+    cd -         (Vuelve al directorio anterior)
+
+
+27) Permisos
+
+	[filmico@localhost ~]$ ls -l
+  
+    Permisos    Links del Archivo    Owner    Group   Size Date         File/Directory
+	drwxr-xr-x.       3              filmico  filmico 4096 Jun  2 15:53 Desktop
+
+    Los permisos se indican con 10 caracteres (drwxr-xr-x.)
+
+    a) El primero indica si es un directorio d o un archivo -
+    b) Despues vienen 9 caracteres que se leen de a 3 juntos que indican
+
+    primeros 3    -> permisos del usuario owner
+    segundos 3    -> permisos del grupo
+    ultimos  3    -> permisos de usuarios del sistema que no estan en el grupo ni son el owner
+
+    d = directorio
+    r = read
+    w = write
+    x = execute
+    - = permission not set
+
+
+    En terminos de directorios, la x (executable) permite entrar con cd
+    r permite ver el contenido con ls
+    w permite crear, modificar y borrar archivos en el directorio
+
+    En terminos de archivos, permiso de escritura es permiso de borrado tambien.
+
+
+28) Listar grupos
+
+	whoami    ->  Muestra mi nombre de usuario
+	id        ->  Muestra la info extendida del usuario
+
+	[filmico@localhost home]$ id
+	uid=500(filmico) gid=500(filmico)   groups=500(filmico) context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
+    User ID          Primary Group ID   Other Group ID(name)
+
+    groups		-> Muestra solo los grupos
+
+    En estructuras jerarquicas, podemos dar los permisos r-x para que el usuario entre pero no borre el directorio raiz
+    Luego a los directorios de adentro podemos darle rwx, entonces el usuario va a poder hacer lo que quiera pero ahi adentro.
+
+    OJO CON UN TEMA: Si el directorio tiene permiso w para el grupo donde esta el usuario y existe un archivo que pertenece a otro usuario
+    y no le da permisos ni al grupo ni a nadie mas, igual lo puedo borrar porque se hereda el permiso del directorio para e grupo
+
+    - Mas info en el punto 32)
+
+29) Cambiar de usuario
+
+	su NombreUsuario   -> su significa Switch User    
+
+
+30) sudo   
+
+	admin / root / superUser   son todos equivalentes
+
+	su usrName  -> switch user
+
+	exist  		-> sale de la sesion del usuario al anterior
+	               si se usa exit en la ultima sesion se cierra la consola
+
+    sudo 		-> no hay que confundir con su ya que sudo significa: super user do
+
+    - Supongamos que estoy en el grupo de administradores y quiero loguearme como otro usuario aunque no sepa su password
+      Puedo ejecutar:
+
+      sudo su usrName   -> (superUserDo SwitchUser UsrName)
+
+      Deberia poder cambiar a usrName sin que me pida el usario de usrName
+
+31) Usuarios
+
+	- Los perfiles de usuario viven en /home/
+
+	La info particular de cada usuario se almacena en /etc/ 
+	Esta info contiene user name, login details, home directory y passord
+
+	$ cat /etc/passwd   
+
+	La lista es larguisima. 
+	Podemos acotarla para buscar solo a filmico usando grep en el pipe de salida de la siguiente manera:
+
+	$ cat /etc/passwd | grep filmico
+
+	o simplemente
+
+	$ grep "filmico" /etc/passwd
+
+	- El resultado que nos devuelve es el siguiente:
+	      
+		filmico:x:500:500:filmico:/home/filmico:/bin/bash
+	       1   :2: 3 : 4 :   5   :     6       :    7
+
+	   1) usrName
+	   2) generalmente es una x que indica que el password se guarda en un archivo oculto no aqui
+	   3) usrID
+	   4) groupID
+	   5) usrFullName, telephone number, etc
+	   6) home del usuario
+	   7) Shell que usa el usuario cuando loguea. 
+	      Es el ejecuta todos los comandos. En este caso se usa el shel bash
+
+    - El verdadero password se guarda en
+
+    	sudo cat /etc/shadow
+
+    	De todas maneras el password esta encriptado!
+
+    	La estructura es la siguiente:
+
+    	pulse:!!:17682::::::
+          1  : 2: 3   
+
+      	1) usuario
+      	2) password    * indica que no tiene seteado password
+
+      		Linux no guarda los passwords, pero si guarda el resultado de hashear el password
+      		Cuando ingresamos el password, lo hashea y compara su es igual a lo que tiene almacenado
+
+      	   Si hay un password seteado, debemos observar los signos $
+
+      	   filmico:$6$EYWTrQDS02XQWFFk$M2IKKSNIcmMbke3G/64PML7Ql40eDcTADppFNUl4QouwnBnq87oBK7IkcLg6erqLdfjZHj6w.fWs04b/hbgeP/:17682:0:99999:7:::
+      	           $ $                $
+
+           - El $6 indica el algoritmo usado para hashear el password. 6 Representa SHA.
+       	   - El segundo signo $ contiene el SALT que se usara en el algoritmo.
+       	     Esto previene que dos usuarios con el mismo password tengan el mismo resultado del algoritmo.
+           - El ultimo $ indica el hash calculado del password ingresado
+
+           - La info despues de los : indica cuanto dura la sesion, cada cuanto hay que cambiar el password, etc
+
+
+    Para mas info, podemos ejecutar: $ man shadow
+
+31) Agregar usuarios
+
+	Lo mejor es agregar un usuario y meterlo en el grupo todo de una vez:
+
+		$ sudo useradd -g "emily" -G "family,schoolmates" emily
+
+	Con esto agregamos el usuario emily al grupo principal emily y a los grupos secundarios family y schoolmates.
+
+	Otro Ejemplo creando emily y asignando grupo emily y grupo secundario gerardo 
+
+		$ sudo groupadd emily
+		$ sudo groupadd gerardo
+		$ sudo useradd -g "emily" -G "gerardo" emily
+		$ groups emily
+
+			emily : emily gerardo
+
+
+   Los grupos de los usuarios estan indicados en /etc/group:
+
+	$ cat /etc/group | grep filmico
+	filmico:x:500:
+
+	Ahi se indica el grupo filmico que tiene un password y un ID 500
+
+	Agregar usuarios: $ sudo adduser usrName
+
+	a) Crea un directorio en el /home con el nombre del usuario
+	b) Crea un nuevo grupo llamado igual que el usuario y lo asigna al grupo
+	c) Crea la estructura basica en el /home de carpetas tipicas (download, documents, desktop, etc)
+
+	Podemos verificar esto ejecutando:
+	ls /home
+	
+	Chequeamos que exista el usuario
+	--------------------------------
+	$ sudo cat /etc/passwd | grep ger
+		gerardo:x:501:501::/home/gerardo:/bin/bash
+
+	Chequeamos que tenga password asociado
+	--------------------------------------
+	$ sudo cat /etc/shadow | grep gerardo
+		gerardo:!!:17688:0:99999:7:::
+
+	El doble !! indica que no tiene password seteado
+
+	Chequeamos el grupo
+	--------------------
+	$ sudo cat /etc/group | grep ger
+		gerardo:x:501:
+
+	En el primer chequeo de usuario podemos ver que su grupo es el 501.
+	En este ultimo chequeo observamos que existe un grupo 501 con el mismo nombre del usuario.
+
+	Aca observamos que la x indica que el grupo gerardo tiene seteado un password default
+
+	- adduser tiene muchos parametros que podemos usar al momento de la creacion de un usuario
+
+
+32) Cambiar password de un usuario
+
+    Lo puede hacer el root borrando el password anterior
+
+    - El siguiente comando conviene ejecutarlo despues de bloquear la cuenta del usuario.
+    - Luego de cambiar o borrar el password, podemos desbloquear la cuenta.
+
+    passwd -d "gerardo"	   (Borra el password)
+
+    passwd "gerardo"	   (Setea un nuevo password)
+
+33) Agregar grupos
+
+	sudo groupadd nombreGrp
+
+	$ sudo groupadd migrupo
+
+	Chequeamos que se haya agregado el grupo:
+	cat /etc/group | grep  "mig"   
+
+34) Agregar usuario a un grupo
+
+	Al momento de creacion hacerlo asi:
+
+	- Agrega emily al grupo friends como primario y a family y schoolmates como grupos secundarios 	
+
+	sudo useradd -g "friends" -G "family,schoolmates" emily
+
+	Si el usuario y el grupo ya estan creados, usar usermod
+
+	sudo usermod -G "miGrupo" gerardo
+
+	Para verificar la asignacion tipeamos:
+
+	$ groups gerardo
+	gerardo : gerardo miGrupo
+
+35) Borrar usuario
+
+	Por default, el borrado de un usuario no borra ni su home ni sus grupos
+
+	Para borrar un usuario corremos:
+
+	$ sudo userdel userName
+
+	Para Borrar todo lo de un usuario corremos:
+
+	$ sudo userdel -r userName	
+
+36) Descripcion de grupos y usuarios	
+
+	El comando lslogins tiene muchos parametros para entregar data de los usuarios
+
+	$ lslogins -u
+
+	  UID USER      PWD-LOCK PWD-DENY LAST-LOGIN GECOS
+	    0 root                          15:53:06 root
+	  500 filmico                       20:57:44 filmico
+	  501 gerardo                       17:35:45 
+	65534 nfsnobody                              Anonymous NFS User
+
+
+37) Comando Tree
+
+	- Por default no viene instalado con Centos o SL Linux. Corremos lo siguiente para instalarlo
+
+	$ sudo yum install tree -y
+
+38) Soft and Hard Links
+
+	- Los Hard Links apuntan al mismo archivo en disco pero con otro nombre. (Su id en el sistema es distinto)
+		Esto quiere decir que si borramos el archivo original, el hardlink seguira pudiendo acceder al contenido.
+		De la misma manera, como los dos apuntan al mismo punto del disco, editar uno edita el otro.
+
+	- Los Soft links funcionan como en windows. Si borramos el archivo, el soft link deja de poder acceder.
+
+	Supongamos que tenemos un archivo llamado file1.txt
+
+	- para crear un hard link hacemos
+
+	$ ln file1.txt hardlink.txt
+
+	si hacemos ls, devuelve la info donde solo por el tamaño observamos que son dos archivos iguales.
+
+	Ahora, si usamos el comando $ ls -li, podemos observar que a la izquierda muestra el id (inode) del archivo y es el mismo
+
+	 928153 -rw-rw-r--. 2 filmico filmico   19 Jun  7 19:32 archivo1.txt
+	 928153 -rw-rw-r--. 2 filmico filmico   19 Jun  7 19:32 hardlink.txt
+
+	- Ahora vamos a crear un soft link y volvemos a pedir el listado
+
+	$ ln -s archivo1.txt softlink.txt
+	$ ls -li
+
+ 928153 -rw-rw-r--. 2 filmico filmico   19 Jun  7 19:32 archivo1.txt
+ 928153 -rw-rw-r--. 2 filmico filmico   19 Jun  7 19:32 hardlink.txt
+ 928151 lrwxrwxrwx. 1 filmico filmico   12 Jun  7 19:36 softlink.txt -> archivo1.txt	
+
+ 	- Como podemos ver, el inode del soft link es distinto, lo que indica que si borramos el soft link no se borra el archivo original. A su vez la consola nos muestra a que archivo apunta el soft link.txt
+
+
+39) Navegando con historial (pushd popd) 	
+
+	- Como vimos antes, para imprimir el directorio de trabajo completo escribimos $ pwd
+
+	$ pushd .          (Guarda el path del directorio actual en una Pila)
+	$ dirs 			   (Lista la Pila)
+    $ popd			   (Nos lleva al ultimo directorio guardado)
+
+    Recordar que una vez que usamos popd, el directorio se borra de la pila.
+
+40) Ver Contenido de Archivos (cat, tac, less, tail, head)
+
+	cat, tail y head ya se vieron con anterioridad
+	tac es inverso a cat y permite ir scroleando el archivo
+
+	Less Is Better Than More!!!
+	---------------------------
+	less es muy similar a vim y permite escrolear un archivo y hacer busquedas
+	more es igual a less pero no permite escrolear de arriba abajo en las busquedas
+
+41) Crear archivos sin contenido
+
+	$ touch es un comando interesante para actualizar el timeStamp de un archivo
+
+	Si usamos touch seguido de un nombre de archivo que no existe, este archivo se crea.	
+
+42) Reinstalar las utilidades
+
+	- Siguiendo el tutorial, encontre que algunas utilidades como rm faltaban.
+	Encontre que habia que re instalar el core utilities
+
+	$ sudo yum reinstall coreutils
+
+43) Crear y Borrar Archivos y Directorios	
+
+	- En la consola no existe la papelera!
+
+	$ mv	(move  mueve o renombra archivo. Si no especificamos path, solo renombra)
+	$ rm    (remove - borra archivo)
+
+	$ mkdir	  (crea directorios)
+	$ rmdir   (borra directorios vacios)
+	$ rm -rf  (borra directorios recursivamente hacia adentro y sus archivos de manera forzada)
+
+	Hay dos parametros importantes de rm:
+
+	-i (intereactive)
+	-f (force)
+
+	Un directorio no se puede borrar si tiene archivos. podemos borrar los archivos o borrar el directorio con rmdir -f
+
+	-i se usa para pedir confirmacion antes del borrado
+
+	- Para borrar todo el contenido de un directorio ejecutamos:
+
+	$ rm *
+
+	El siguiente comando borra recursivamente el directorio carpeta y todos sus archivos, preguntando interactivamente cada borrado.
+
+	$ rm -rfi carpeta/
+
+44) Modificar el look del Prompt
+
+	- Usualmente el prompt luce asi:  usuario@ComputerName ubicacion
+	Esto se guarda en la variable $PS1
+
+	podemos chequearlo tipeando: $ echo $PS1
+
+	[\u@\h \W]\$
+
+	Para cambiarlo que es basicamente modificar la variable de entorno $PS1 tipeamos:
+
+	$ PS1 = "\u@\h \$ "
+
+45) Pipes
+
+	Existen 3 streams siempre activos en un archivo
+
+						 ID
+		Standard input   0   (Usualmente el teclado)
+		Standard Output  1   (Usualmente la consola)
+		Standard Error   2   (Usualmente un archivo de log de errores)
+
+	Podemos reconectar estos streams con los pipes
+
+	Los simbolos > y < se usan para indicar si lo que sigue al comando es una entrada o una salida.
+	< simbolo de entrada
+	> simbolo de salida
+
+	Ejemplos:
+
+	$ do_something < input-file        (input-file es la entrada < de do_something)
+	$ do_something > output-file       (output-file es la salida > de do_something)
+
+	- Siguiendo la logica de los ID 0, 1, 2 podemos mapear el error a un archivo asi:
+
+	$ do_something 2> error.log
+
+	- Lo siguiente captura la salida y los errores en el mismo archivo. El %1 es reemplazado por el nombre del archivo all-output_file.txt
+
+	$ do_something > all-output_file.txt 2>%1
+
+46) Buscar Archivos (locate) 
+
+	Es un comando relativamente nuevo en algunas distro de linux. Es super rapido pero su base de datos debe indexarse para ser certero. Solo los root pueden indexarla
+
+	busca la palabra zip y de todo el listado lo que contenga la palabra bin
+
+	$ locate zip | grep bin
+
+	- Este listado se produce con una base de datos que usualmente linux actualiza todos los dias.
+	  Para forzar la actualizacion corremos:
+
+	$ sudo updatedb
+
+	Para evitar esto pero en una version de busqueda mas lenta, podemos usar find
+
+47) Buscar Arcivos (find)
+
+	- A diferencia de locate, find no necesita de una base de datos. Esto hace que las busquedas sean mas lentas pero a su vez precisas.
+
+	- Con el siguiente comando, podemos buscar todos los logs del directorio donde estamos parados
+
+	$ sudo find . -name "*.log"
+
+	- Con el siguiente comando buscamos desde el raiz,
+	  todos los archivos cuya extension sea .log
+	  de todo el listado, nos quedamos con los que tienen la palabra vmware
+	  y por ultimo lo paginaos con less
+
+	$ sudo find / -name "*.log" | grep vmware | less
+
+	- Dentro de los parametros de find, hay uno muy interesante llamado type. 
+
+	- type d busca directorios
+	- type f busca ficheros
+
+	$ find /usr -type d gcc   
+	$ find /usr -type f gcc
+
+	- Otro ejemplo. Buscar todos los directorios que se modificaron en la ultima hora
+
+	$ sudo find / -type d -ctime 1 | less
+
+	- Buscar archivos modificados hoy
+
+	$ sudo find -type f -mtime 0
+
+48) Borrar archivos por lotes con find
+
+	- En el siguiente ejemplo, se muestra como find, busca archivos desde el root
+	  con extension .log y de todo ese conjunto ejecuta la instruccion remove rm
+
+	  los {} es donde se ubicaran los nombres de archivos separados por coma
+	  y siempre se termina con ;
+
+	$ find / -name "*.log" -exec rm {} ';'	
+
+	- En vez de usar exec, podeos usar -ok para que linux nos pregunte en casa caso antes de proceder al borrado
+
+	$ find / -name "*.log" -exec rm {} ';'	
+
+48) Wildcards
+
+	$ ls -al 	(lista todo (a) en modo lista (l))
+
+ 	? 		busca un caracter
+ 	*		busca uno o varios caracteres
+ 	[set]   busca individualmete los caracteres entre []
+ 	[!set]  lo opuesto de set
+
+ 	$ ls *.txt   		(Muestra todo los archivos con extension txt)
+ 	$ ls [tr]*.txt    	(Muestra todo los archivos que comiencen con tr, sigan con cualquier letra/s y que sean txt)
+
+ 	- Como en las expresioens regulares, si usamos letras entre - busca desde hasta la letra
+
+ 	$ ls [t-z]*.txt		(Muestra los archivos que comiencen con una letra comprendida entre t y z, que sigan con cualquier letra/s y que tengan extension txt)
+
+49) Customizar parametros por default con el uso de alias y el archivo .bashrc
+
+	En el siguiente ejemplo crearemos un alias para que al usar el comando ls se ejecute ls -l
+
+	En linux, en nuestro perfil, existe algunos archivos ocultos de configuracion. Uno de ellos se llama .bachrc
+
+	Lo podemos ver si ejecutamos $ ls -la ya que es un archivo oculto
+
+	- El archivo .bachrc contiene datos de configuracion y definicion de alias de los comandos nativos
+
+	Para editarlo hacemos:
+
+	$ sudo vim ~/.bachrc   o  $ suvo vim .bashrc
+
+	- Ahi podemos agregar esto:
+
+	# User specific aliases and functions
+	alias ls='ls -l --color=auto'	
+
+	- Salimos presionando Esc, luego : y seguido wq que significa write quite
+
+	Debemos reiniciar la consola para que el cambio surta efecto
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

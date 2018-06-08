@@ -1,0 +1,17 @@
+LINUX
+=====
+
+http://ftp.scientificlinux.org/linux/scientific/6.8/x86_64/iso/
+
+https://www.scientificlinux.org/downloads/sl-versions/sl6/
+
+Training
+--------
+https://training.h3abionet.org/technical_workshop_2015/?page_id=340
+
+https://courses.edx.org/course_modes/choose/course-v1:LinuxFoundationX+LFS101x+1T2017/
+
+
+All
+---
+https://training.linuxfoundation.org/linux-courses/system-administration-training
