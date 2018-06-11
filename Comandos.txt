@@ -1,3 +1,12 @@
+Curso
+-----
+https://courses.edx.org
+
+Libro gratis con todos los comandos
+-----------------------------------
+http://linuxcommand.org/tlcl.php
+
+
 Guia de Re-instalacion Avanzada
 -------------------------------
 http://astr.tohoku.ac.jp/~akhlaghi/newlinux.html
@@ -17,9 +26,62 @@ https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/6.
 
 Comandos
 ---------
+
 0) Manual
 
+  El manual que explica como leer los manuales se llama man y el comando para leer los manuales es man
+
+  $ el signo pesos es lo que siempre esta a la izquierda del prompt
+
+  $ man man   (Nos lleva al help del manual del linux)
+
+  h dentro del manual nos desplega los shorcuts de navegacion.
+
+
+  - Shorcuts Utiles
+
+  j 		Avanza 1 Linea
+  k 		Retrocede 1 linea
+  Ctrl+f 	Avanza 1 Pagina
+  Ctrl+b 	Retrocede 1 Pagina
+  g 		Salta al Inicio
+  G 		Salta al final
+
   man cat   (nos muestra el manual del cat)
+
+  Parametros:
+
+  Los parametros de los comandos se pueden usar de la siguiente manera:
+
+  ls --width = 60
+  ls -w 60
+  le -w60
+
+  - Algunos comandos largos tienen secciones
+  Podemos leer esas secciones ejecutando:
+
+  $ man 2 unlink	(Muestra la seccion 2 de unlink)
+
+  Para listar las apariciones de una palabra o comando en otros manuales usar
+
+  $ man -k comando o palabra
+
+  - NOTA: Existen comandos que perteneces al shell y para estos comandos no hay man pero si help
+
+  $ man bach
+
+  	Ahi podemos ejecutar una busqueda y escribir   / SHELL BUILTIN COMMANDS
+
+  - En comando Type, nos permite saber si el comando se trata de un builtin command del bash o de un ejecutable.
+
+  $ help       (Nos da una lista de comandos donde podemos usar el help)
+  $ help help  (Nos da algunos argumentos que podemos usar con el help)
+  $ type help  (Responde -> help is a shell builtin)
+  $ type while (Responde -> while is a shell keyword) Una especie de builtin command
+
+
+  - Tambien existe el comando info que se cubre en el punto 54)
+
 
 1) Permisos de ejecucion
 
@@ -761,7 +823,7 @@ Comandos
 
 	$ find / -name "*.log" -exec rm {} ';'	
 
-48) Wildcards
+49) Wildcards
 
 	$ ls -al 	(lista todo (a) en modo lista (l))
 
@@ -777,7 +839,7 @@ Comandos
 
  	$ ls [t-z]*.txt		(Muestra los archivos que comiencen con una letra comprendida entre t y z, que sigan con cualquier letra/s y que tengan extension txt)
 
-49) Customizar parametros por default con el uso de alias y el archivo .bashrc
+50) Customizar parametros por default con el uso de alias y el archivo .bashrc
 
 	En el siguiente ejemplo crearemos un alias para que al usar el comando ls se ejecute ls -l
 
@@ -800,26 +862,158 @@ Comandos
 
 	Debemos reiniciar la consola para que el cambio surta efecto
 
+51) Instalando software
+
+	En Fedora, hay dos niveles de paquetes
+
+	a) RPM (Bajo Nivel)
+		- Detalle de desempaquetado de paquetes
+		- Desempaquetado de paquetes individuales
+		- Correr Scripts
+		- Instalar el software correctamente
+
+	b) yum (Alto Nivel)
+		- Trabaja con grupo de paquetes
+		- Se encarga de la descarga de los mismos
+		- Revisa y resuelve dependencias
+
+		YUM significa: Yellowdog Updater Modified. Es open source y es el package manager del RPM
+		Las versiones nuevas de Fedora, reemplazaron YUM con el comando dnf que tiene poca compatibilidad con cosas viejas pero muchas ventajas nuevas y muy util para las herramientas del dia a dia
+
+	- La mayoria de las veces, los usuarios usan yum que solo se encarga de llamar a RPM
+
+	Nota: Puede pasar que un simple paquete, necesite de muchos paquetes grandes y que esto demore la bajada e instalacion.
+
+	Operation RPM 
+  	Install package 			 	rpm -i foo.rpm
+  -	Install package dependencies 	yum install foo
+	Remove package                  rpm -e foo.rpm
+  -	Remove package dependencies     yum remove foo
+	Update package                  rpm -U foo.rpm
+  -	Update package dependencies     yum update foo 
+  - Update entire system            yum update
+  -	Show all installed packages     rpm -qa or yum list installed
+	Get information on package      rpm -qil foo
+	Show packages named foo         yum list "foo"
+	Show all available packages     yum list apt-cache
+ 	What package is file part of?   rpm -qf file
+  - Listar Paquetes instalados		yum list installed
+
+	- Ejemplo de instalacion de paquete lynx que es un navegador web por consola
+	$ sudo yum search lynx    (Con eso obtenemos la data de librerias y del paquete que vamos a bajar)
+	$ sudo yum install lynx   (Instalamos el paquete)
+	$ sudo yum info lynx      (Obtenemos info del paquete)
+	$ sudo yum remove lynx    (Quitamos el paquete)
+
+52) Averiguar version del kernel instalada
+
+	$ sudo uname -r
+
+		2.6.32-696.30.1.el6.x86_64   (Es comparable con un Fedora 12 o 13 que usan kernel 2.6.3x)
+		https://en.wikipedia.org/wiki/Fedora_version_history
+
+53) Instalar VLC
+
+	Instrucciones detalladas  https://www.videolan.org/vlc/download-redhat.html
+
+	1) Instalar RPM Fusion (Free and NonFree)  https://rpmfusion.org/Configuration/
+
+		$ sudo yum localinstall --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-6.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-6.noarch.rpm	
+
+	2) Instalar Extra Package for Enterprise Linux  (https://fedoraproject.org/wiki/EPEL)
+
+		$ sudo yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm		
+	3) Instalar VLC
+		
+		$ sudo yum install vlc
+
+54) Documentacion
+
+	- En el modo grafico podemos ir a System -> Help donde encontraremos toda la ayuda incluidos los manuales.
+
+	- Man (Podemos repasar como se usa en el punto 0 de este archivo)
+
+	Man en la web http://man7.org/linux/man-pages/
+
+	- https://www.gentoo.org/support/documentation/
+
+	- GNU Info System (Es un sistema anterior a la WWW que tiene documentos enganchados)
+	  Esto permite browsear un help desde la consola
+
+	  $ El comando mas importante es info
+
+	  $ Info 		(Tipeado solo y sin parametros, nos muestra el indice de todos los comandos del sistema)
+
+	  $ info ls     (Se usa up page, down page, flechitas, h para help y q para salir)
+
+	  - Comandos dentro de info
+
+	  h 		Muestra el help de info
+	  Ctrl+s 	Search - Hace busquedas. Ctrl+s de vuelta sigue avanzando en la busqueda. Para salir Ctrl+g
+	  q 		Sale del programita
+	  *         Cuando vemos un asterisco significa que podemos entrar en ese link con enter. 
+	  l         Volver atras
+      q         sale de info
+
+55) Crear archivo ejecutable tipo Batch
+
+	a) Crear el archivo con vim
+		$ vim archEjecutable
+
+	b) Agregar la ruta al bash al principio del archivo
+
+		#!/bin/bash
+	
+	c) Indicar algun comando a ejecutar. Por ejemplo la calculadora de gnome
+		/usr/bin/gnome-calculator
+
+    d) Cambiar el modo del archivo a ejecutable
+
+    	$ chmod +x archEjecutable
+
+	e) Para ejecutar correr:
+
+	   ./archEjecutable
+
+56) Process
+
+	- Los procesos pueden correr en el background. Esto libera a la consola de ese proceso.
+		
+	Tipos de procesos:
+
+	a) Interactive: Normalmente los lanza el usuario desde la consola o desde la interfaz grafica. Ej: bash, firefox
+
+	b) Batch Processes: Procesos automaticos que se suelen lanzar desde la consola y que arrancan de manera desconectada de la misma consola. EJ: updatedb
+
+	c) Deamons: Procesos del sistema operativo que corren incluso en el arranque del sistema y que estan a la espera de la solicitud de ejecucion de una accion, por parte del usuario. Ej: httpd, xinetd, sshd
+
+	d) Threads: Tareas que se lanzan en paralelo desde un proceso. Estas tareas pueden ir terminando por separado y no cerrar el proceso que las lanzo. EJ: firefox, gnome-terminal-server
+
+	e) Kernel Threads: Son tareas del kernel que el usuario final no lanza ni termina. Realizan tareas como mover los threads de un procesador al otro, asegurarse que las operaciones de lectura/escritura del disco rigido hayan sigo completadas, etc.  Ej: kthreadd, migration, ksoftirqd
 
 
+	- En linux existe una funcion central que se llama scheduler y que se encarga de asignar el tiempo permitido de ejecucion para cada proceso. Estos permisos de ejecucion, se colocan en una pila donde van corriendo por de manera secuencial. En el caso de un equipo multiprocesador, existe una pila de ejecucion por cada nucleo.
+	Tambien existe una pila de espera para los procesos que requieren de que otros terminen o de la intervencion del usuario como por ejemplo, una respuesta ingresada por teclado.
 
+    - Procesos Zombies
+      Los procesos zombies, son un estado de un proceso hijo que ha terminado y cuyo padre no pregunta si ese hijo ha terminado. De esta manera el padre, queda encendido indefinidamente y sin hacer nada. 
 
+  	- ID  (Linux asigna un ID a cada proceso)
 
+  	  PID  -> significa Process ID
+  	  PPID -> significa Parent Process ID
+  	  TID  -> significa Thread ID. 
 
+  	  Todos los threads que pertenecen a un mismo proceso, tienen un TID diferente pero un mismo PID
 
+  	- Los procesos se pueden terminar con el siguiente comando:
 
+  	$ ps     (Lista los procesos)
 
+		   PID TTY          TIME CMD
+		  3402 pts/0    00:00:00 bash
+		  3912 pts/0    00:00:00 ps  	
 
+  	Supomgamos que queremos terminar ps cuyo PID es 3912
 
-
-
-
-
-
-
-
-
-
-
-
-
+  	$ kill -9 3912    (El -9 indica la manera en que matamos el proceso)
