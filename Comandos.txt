@@ -1007,6 +1007,7 @@ Comandos
   	  Todos los threads que pertenecen a un mismo proceso, tienen un TID diferente pero un mismo PID
 
   	- Los procesos se pueden terminar con el siguiente comando:
+  	  ---------------------------------------------------------
 
   	$ ps     (Lista los procesos)
 
@@ -1017,3 +1018,96 @@ Comandos
   	Supomgamos que queremos terminar ps cuyo PID es 3912
 
   	$ kill -9 3912    (El -9 indica la manera en que matamos el proceso)
+
+  	$ ps aux 	(Lista todos los procesos auxiliares)
+  	$ ps aux | grep filmico    (lista los procesos y filtra de los resultados, solo los que dicen filmico en alguna parte del renglon)
+
+  	- Los usuarios y los grupos tienen los siguientes ID
+  	  ---------------------------------------------------
+
+  	RUID	Real User ID who start the process
+  	EUID	Efective User ID of the User who alow this user to run the process. 
+  	RGID 	Real Group ID of the user
+  	EGID	Access right of the group
+
+  	- Prioridad de los procesos
+  	  -------------------------
+
+  	Los procesos tienen prioridad de ejecucion. 
+
+  	La prioridad mas alta es -20
+  	La prioridad mas baja es  19
+
+
+  	- Comando top
+  	  -----------
+  	  El comando top es una especie de task manager de windows
+  	  Muestra un listado con los PID, usuarios y cada proceso que esta corriendo
+
+      Existe un comando llamado htop que es todavia mas parecido al task manager del windows
+      Funciona en consola y lo podemos instalar con:
+
+      $ sudo yum install htop
+
+    ps 
+
+    Ver el archivo de los tutoriales: 
+    C:\Linux Training\Tutoriales\03_Procesos\URL y comandos.txt
+
+57) Tareas Programadas  (at - cron -sleep)
+	
+	AT
+	**
+
+	at permite ejecutar una sentencia en un momento especifico.
+
+	$ at now + 2 days cat file1.txt    (Presionar Ctrl+D para salir
+
+	CRON
+	****
+
+	- Existen las tablas de cron a nivel de usuario y a nivel de sistema
+	Las mismas se ubican en  /etc/crontab
+
+	El comando para entrara a editar las tareas programadas es el siguiente:
+
+	$ crontab -e
+
+	Los valores son los siguientes:
+
+	Field	Description		Values
+	MIN		Minutes			0 to 59
+	HOUR	Hour field		0 to 23
+	DOM		Day of Month	1-31
+	MON		Month field		1-12
+	DOW		Day Of Week	0-6 (0 = Sunday)
+	CMD	Command	Any command to be executed	
+
+	- Cada linea es un job que hay que correr y el mismo tiene que tener una serie de atributos
+	  A continuacion, se muestra una tarea que se tiene que ejecutar, cada dia, a cada hora, de cada mes de cada año
+	* * * * * /usr/local/bin/execute/this/script.sh
+
+	  A continuacion, se muestra una tarea que se tiene que ejecutar 08:30 el 10/06 no importando si es lunes, martes, miercoles, etc
+	30 08 10 06 * /home/sysadmin/full-backup
+
+	SLEEP
+	*****
+	A diferencia de "at", que lanza la ejecucion en un momento, sleep permanece en espera para ejecutar hasta que una señal o un tiempo determinado se cumpla.
+
+	Syntax: sleep NUMBER[SUFFIX]...
+
+	where SUFFIX may be:
+                1.   s for seconds (the default)
+                2.   m for minutes
+                3.   h for hours
+                4.   d for days.
+
+	                
+
+
+
+
+
+
+
+
