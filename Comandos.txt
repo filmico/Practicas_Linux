@@ -1102,6 +1102,11 @@ Comandos
                 3.   h for hours
                 4.   d for days.
 
+
+
+58) Cambiar nombre al PC
+
+	
 	                
 
 

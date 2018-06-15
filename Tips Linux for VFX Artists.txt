@@ -1,0 +1,452 @@
+Podemos convertir a un usuario en super user, editando el archivo sudoers como se explica en el .txt de los comandos. Con esto logramos que el usuario que tiene permisos elevados, pueda usar el comando sudo antepuesto a cualquier comando y si tiene permisos, podra ejecutarlo.
+
+Tambien podemos usar su y el password del super user para realizar los cambios como el root
+
+El tema es que root tiene permisio para todo. Y sudo tiene una customizacion de permisos de lo que si y lo que no puede hacer un sudoer
+
+
+Estructura de Directorios del Linux:
+------------------------------------
+/
+	bin				Applications, Source Code
+	boot            BootLoader - Kernel to load
+	dev             Devices in the system. 
+	etc 			Config Files for System Services, Networking, general config of the system
+	home 			Users directories. Alsto store users specific configurations
+	lib 			Generic Libraries for app access (Like dll in windows)
+	lib64           Generic 64 bits Libraries for app access (Like dll in windows)
+	lost+found      Files cap on systen crash
+	media           Shortcut for devices like USB. Is where the mounted VMware iso's will reside
+	misc            
+	mnt 			NetowrkShares, Another HDD
+	net
+	opt 			Things that does not contain binaries or source codes. 
+	                Ej. Houdini can be installed here.
+	proc 			Similar to the devices folder. 
+	                Is a place where one application that has files that represent things can talk with another file. Each process has a representative file in this folder.
+	root            Home directory del root.
+	sbin 			Source Code and lower level system things like shell, copy and move commands
+	selinux
+	srv
+	sys
+	tmp             Cache files that usually applications craate like Houdini.
+	usr  			Store applications and resources of this applications. 
+					It's a high level of apps like firefox. Whre is the bin for an app, etc
+	var             This is where logs will be stored.
+
+
+History
+-------
+	Muestra un historial de los comandos ejecutados en la consola
+
+	$ history
+	$ help History 		Para ver los comandos
+
+	$ history -c 		Borra el historial
+
+
+Copiar
+------
+
+	$ cp aaa.txt /home/filmico/temp
+
+	El comando cp puede copiar recursivamente un directorio y todo su contenido 
+
+	$ cp -r source target
+
+Borrar
+------
+
+	$ rmdir         Borra directorios vacios
+
+	----------------------------------------------------------------------------
+	Cuidado con el comando que sigue que borra todo hacia adentro recursivamente
+	----------------------------------------------------------------------------
+	$ rm -rfvI dirName		Borra recursivamente, forzado, Verbose.
+	                        El I confirma borrado de mas de 3 elementos
+
+
+Editar Archivos
+---------------
+	$ nano fileName
+	$ vim fileName
+
+ Saber que tipo de archivo es algo
+ ---------------------------------
+ 	$ file fileName
+
+Crear Directorio el en el raiz y dar permiso de escritura
+---------------------------------------------------------
+	$ cd /
+	$ sudo mkdir projects
+	$ sudo chmod ugo+rwx   o   sudo chmod a=rwx 	
+	$ cd projects
+	$ mkdir miDirectorio
+	$ chmod a+w miDirectorio/     (Ahora si lo puedo correr desde mi usuario)
+
+Cambiar el ownership
+--------------------
+	$ sudo chown owner:group "file or folder"
+
+	$ ls -la
+	drwxrwxrwx.  2 filmico filmico 4096 Jun 13 17:48 miDirectorio
+
+	$ sudo chown filmico:root miDirectorio/
+	$ ls -la
+	drwxrwxrwx.  2 filmico root 4096 Jun 13 17:48 miDirectorio
+
+Reiniciar - Apagar
+------------------
+	$ sudo reboot
+	$ sudo shutdown -h now
+
+
+Alias   (Atajos de acceso rapido)
+-----
+	Los alias solo duran por la sesion de esa consola.
+
+	$ alias rmtree='rm -rfv'
+	$ alias listar='ls -la'
+
+	Podemos ver los alias usando el comando $ alias
+
+Variables de Entorno    
+--------------------
+
+	En produccion se usan para guardar info de acceso rapido
+	Despues se puede usar $secuence en cualquier aplicacion para referis a su contenido
+	Si abrimos otra consola, estas variables no existe y solo estan presntes en el contexto
+	de la consola donde creamos esas variables.
+
+	$ secuence=500
+	$ shot=400
+	$ echo $secuence
+	$ echo $shot
+
+	Lo que sigue, crea directorios, usando las variables de entorno.
+
+	$ mkdir $secuence
+	$ mkdir $secuence/$shot
+
+
+Hacer permanentes las Variables y los Alias en todas las sesiones
+-----------------------------------------------------------------
+
+	Debemos editar el archivo .bashrc del home del usuario
+
+	$ nano .bashrc
+
+	Agregar lo siguiente:
+
+	# Gerardo added
+	alias listar='ls -la' 
+	sequence=500
+
+	Salir y grabar. Ahora la variable $sequence esta vigente en todas las sesiones y el comando 'listar' realiza un listado en columnas de todos los archivos.
+
+	Es comun utilizar este metodo en el caso en que uno desee siempre enviar algo a un lugar especifico.
+
+	Por ejemplo en el archivo .bashrc colocamos:
+
+	# Gerardo added
+	alias renders=/home/filmico/Renders
+
+	Despues podemos acceder desde afuera con $renders
+
+Listar Drivers del Hardware del sistema
+---------------------------------------
+	$ lspci -k 		(Muestra que version de Kernel esta manejando el driver)
+
+
+Agregando El Repositorio RPMFusion
+-----------------------------------
+
+	Por default, Fedora no incluye paquetes que puedan tener licencias o que deban incluir el codigo fuente o que el software este cubierto por patentes.
+
+	Para esto existe una comunidad de gente que mantiene un repositorio alternativo que se llama RPMFusion.
+
+	www.rpmfusion.org
+
+	a) Se debe instalar EPEL (Extra package for Enterprise Linux)
+
+	$ yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+
+	b) Ahora si, podemos instalar rpm fusion free y no free
+
+	$ sudo yum localinstall --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-6.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-6.noarch.rpm		
+
+	c) Actualizar yum
+
+	$ sudo yum check-update
+
+
+Instalar, Desinstalar y buscar Software
+---------------------------------------
+
+	Packages & Repositories
+
+	Los repositorios son los lugares en internet, donde los desarrolladores suben y mantienen los packages. Es el mismo concepto de GIT y sus repositorios.
+
+	Los packages son los empaquetados subidos al repositorio, que al bajarse se expanden e instalan.
+
+	Los packages se pueden instalar desde el modo GUI pero este modo carece de info respecto de las dependencias de paquetes de otros softwares que van a ser instalados para que corra el que necesitamos.
+
+	$ sudo yum search packageName
+	$ sudo yum check-uptade
+	$ sudo yum uptade
+
+	$ sudo yum install ffmpeg filezilla p7zip
+
+	Para encontrar a donde se instalo el p7zip corremos:
+
+	$ sudo find / -name "p7zip"    (El ejecutable es 7za)
+
+	Como ahora el p7zip esta instalado, con click derecho en el GUI, podemos comprimir a .7z
+
+	- En el caso de el GUI de de Fedora o SL-Linux, podemos agregar oquitar packages con Add-Remove Software
+
+	Desinstalar Software
+	--------------------
+		$ sudo yum erase SoftwareName
+
+	Buscar Software para instalar
+	-----------------------------
+		$ sudo yum search all
+
+	Buscar info de un package
+	-------------------------
+		$ sudo yum info vlc
+
+	Buscar updates
+	--------------
+		$ sudo yum check-update
+
+
+Instalando Drivers de la tarjeta de Video
+-----------------------------------------
+
+	Hay 3 metodos de instalar el driver
+
+	1) Usando el driver openSource
+		Existe un driver open source pero no tiene el power que tiene el driver de nvidia o ati
+
+	2) Usando el driver de la marca de la tarjeta de video
+		Por otro lado el driver del partner original, queda atado al kernel y si actualizamos el OS, que incluye actualizar el kernel, se descompagina el driver de video.
+
+	3) Usando el repositorio de packetes
+	   $ sudo yum seach nvidia
+       $ sudo yum install kmod-nvidia
+
+
+	En el caso que al reiniciar el sistema no levante video. Hacemos lo siguiente
+
+	1) Logueamos como root
+	2) $ yum update       (Esto sincrornizaria el driver a la version que tenemos de kernel)
+	3) Restart
+
+
+   Para testear que la placa de video esta bien instalada usamos glxgear que es una utilidad que muestra unos engranajes en opengl
+
+   $ sudo yum install glx-utils
+   $ glxinfo
+   $ glxgears
+
+   Para usar el controlador de nvidia escribimos:
+   $ sudo nvidia-settings
+
+
+Paquetes para VFX
+------------------ 
+	- $ sudo yum install blender wings3d gimp inkscape exrtools openexr-viewers
+
+	blender				Paquet completo 3D
+	wings3d 			Open source 3d Polygon Modeler 
+	gimp        		Editor de Imagenes (Photoshop)
+	inkscape    		Editor de Vectores (Illustrator)
+	exrtools    		Herramientas para trabajar con los exr
+	openexr-viewers 	Soft de ILM para ver exr
+
+
+Instalacion de Houdini
+----------------------
+
+	Los soft audiovisuales conviene instalarlos en /opt
+
+	Se instala bastante directo
+
+	Open a terminal.
+	Unpack the downloaded tar.gz archive. For example,
+	$ tar -xvzf houdini-16.5.378-linux_x86_64_gcc4.8.tar.gz
+	This should create a directory called houdini-16.5.378-linux_x86_64_gcc4.8/
+	Run the houdini.install script:
+	$ cd houdini-16.5.378-linux_x86_64_gcc4.8/
+	$ sudo ./houdini.install
+	You can also double click on the houdini.install file with your mouse. It will run the installer in a terminal.
+
+Instalacion de NUKE
+-------------------	
+	Se descomprime el archivo
+	Se corre como root y se siguen los pasos
+
+RealFlow
+--------
+	Se descomrpime y se arrastra a donde queremos instalarla	
+	Necesita de alguna dependencia pero nada mas
+
+	Si al descomprimir se genera una carpeta realflow en por ejemplo downloads tipeamos lo siguiente:
+
+	$ cd /home/downloads
+	$ sudo cp -r ../realflow /opt
+
+	La dependencia que falta es otro shell de consola llamado cshell. Es mas viejo que bash
+    Como cshell es un poco viejo, existe un proyecto que lo mantiene un pooco mas actualizado que se llama tcsh (T Sharp Shell)
+
+    $ sudo yum install tcsh
+
+    $ cd /opt/realflow/bin/realflow
+
+Tweaks post install
+-------------------
+	Para el realflow tenemos que crear el path en el environment variable $PATH para que sepa donde encontrarlo y asi podramos lanzarlo desde cualquier lugar
+
+	$ echo $PATH
+
+	/usr/lib64/qt-3.3/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:/home/filmico/bin
+
+	Para agregar elementos nuevos tipeamos:
+
+	$ PATH=$PATH:/opt/realflow/bin
+
+	$ wich realflow
+	/opt/realflow/bin/realflow
+
+	Para que todo esto quede siempre vigente, tenemos que editar el bashprofile
+
+	$ sudo nano bashrc
+
+	Ahi ponemos lo del path  
+
+	# Path to RealFlow
+	PATH=$PATH:/opt/realflow/bin
+
+
+Manejando Recursos
+------------------
+
+	Cambiar Prioridad de un proceso
+	$ sudo renice -n valor -p numeroDeProceso
+	$ htop
+
+	Manejar Trafico de Red
+	-----------------------
+	$ sudo yum install iptraf
+	$ sudo iptraf
+
+	Monitorear el Disco
+	-------------------
+	$ lsof    Muestra info de que proceso lo tiene tomado que usuarios
+
+	Espacio en disco
+	----------------
+	$ df      Disk Full
+	$ df -h   Muestra en Gigabytes
+
+	$ du      Disk Usage
+	$ du -h   Convierte a Gigabytes o Human Readable
+	$ du -sh  Summary en Gigabytes
+
+Copiando Archivos
+------------------
+	$ rsync -a --progress --delete Source/ Target/               
+
+	-a 			Exact copy with permissions and all
+	-delete 	Deletes from the target what's not in the source
+
+	Si los directorios ya estan creados, se coloca una / al final para que no copie esos directorios, sino el contenido
+
+Crear un Cron para backupear
+----------------------------
+	$ crontab -l 		Lista los crons del usuario
+	$ crontab -e        Edita
+
+	# A las 5:30 Todos los dias del Lunes-Viernes (Domingo es 0)
+	30 5 * * 1-5 rsync -a --progress --delete Source/ Target/
+
+Formatear USB
+-------------
+	$ gparted
+
+SSH
+---
+	SSH ya viene instalado en Fedora. Cualquier cosa se puede instalar con $ sudo yum install ssh
+
+	Syntaxis: ssh usr@hostName
+
+	$ ssh filmico@localhost
+
+	Si quiero usar un soft que necesita graficos del destino hago
+
+	$ ssh -X filmico@localhost        (X arma un tunel grafico)
+	$ sudo gparted					  (Esto abre el gparted en modo grafico del destino)
+
+	- Existe una aplicacion para el telefono (Android) llamada connectBot que es un cliente ssh
+
+Conectandose remoto a windows
+-----------------------------
+	Windows usa un protocolo propio llamdo remoteDesktop. Tenemos que bajar un package llamado rdesktop
+
+	$ rdesktop hostname
+	$ rdesktop -g 1280x720 -f hostname   (En 1280x720 y full screen)
+
+	Para conectar con interfaz grafica, guardando las estaciones de trabajo hay otro package llamado Remmina Remote Desktop Client.
+	Este tambien conecta usando VNC que sirve para MAC y SSH para otros linux
+
+	Tambien se puede compartir el control remoto en Sistema, preferencias, Desktop Sharing
+	Esto habilita el servicio VNC en el equipo.
+
+Conectarse a Shares de la Red  (2:38)
+-----------------------------
+
+	---------------------------
+	Esto hay que estudiarlo mas
+	---------------------------
+
+	Basicamente esto usa el servicio Samba
+
+	En el caso de Fedora, esta todo ya instalado pero en otros linux tenemos que hacer:
+
+	$ sudo yum install samba-client samba-common cifs-utils
+
+	Se puede usar el explorador de archivos. File-> connect to server..
+
+	Para hacerlo permanente, tenemos que editar el archivo fstab (file system table)
+
+	
+
+	$ sudo nano /etc/fstab
+
+	Toda la indicacion del disco que ya existe no hay que tocarla! Colocamos abajo segun la syntaxis que sigue:
+
+	<File System>        <mount point>    <type>    <options> <dump> <pass>
+	//machineName/Share  /mnt/projects    cifs      guest,_netdev,uid=filmico,guid=filmico 0 0
+
+	_netdev significa, no conecte si la red no esta disponible
+
+
+	# Added by Gerardo for network projects
+	//machineName/Share /mnt/projects cifs guest,_netdev,uid=filmico,gui=filmico 0 0
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
