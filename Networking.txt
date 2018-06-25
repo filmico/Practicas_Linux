@@ -1,2 +1,307 @@
+Construir Red con VMWare o VirtualBox
+--------------------------------------
+
+	https://www.server-world.info/en/note?os=Fedora_13&p=first_conf&f=3
+
+	https://docs-old.fedoraproject.org/en-US/Fedora/15/html/Deployment_Guide/ch-Network_Interfaces.html
+
+	Vamos a configurar una estacion como server samba y la otra como cliente.
+	Por default, cuando creamos una maquina virtual, VMWare crea una sola placa de red.
+	La ponemos en modo NAT y entramos a Advanced de la Red y le Generamos una MAC address
+
+	1) Lo primero que tenemos que hacer es ponerle nombre a cada PC
+
+		Fuente: http://www.labtestproject.com/using_linux/permanently_change_hostname_on_fedora
+
+		1.1) Editar el archivo /etc/sysconfig/network
+
+			Primero hacemos una copia
+			$ sudo cp -pr /etc/sysconfig/network /etc/sysconfig/network.bak
+
+			Editamos el archivo
+			$ sudo vim /etc/sysconfig/network
+
+			NETWORKING=yes
+			HOSTNAME=localhost.localdomain        (Cambiamos este valor por el nuevo nombre Ej. Server)
+			NTPSERVERARGS=iburst
+
+		1.2) Verificamos que el cambio surtio efecto y reiniciamos
+
+		$ sudo cat /etc/sysconfig/network
+
+		Nota: No se debe editar el archivo hosts como indica en la mayoria de los links
+
+		Hacemos lo mismo con las dos estaciones
+
+	2) Una vez que las estaciones reinician, debemos configurar la primer placa de red.
+
+		Se podrian crear las dos placas de red y configurarlas directamente pero hace mas dificil saber cual es cual.
+		Por eso repetiremos este paso dos veces por cada placa.
+
+		2.1) En la consola tipeamos:
+		$ ifconfig
+
+		2.2) Deberia aparecer algo similar a lo siguiente:
+
+		eth0      Link encap:Ethernet  HWaddr 00:0C:29:B5:C0:E3  
+		          inet addr:192.168.81.130  Bcast:192.168.81.255  Mask:255.255.255.0
+		          inet6 addr: fe80::20c:29ff:feb5:c0e3/64 Scope:Link		
+
+        Esto indica que linux detecto automaticamente el nombre del hardware y lo identifico como eth0 para la placa NAT
+
+        2.3) Editamos su configuracion para que tenga IP automatica (DHCP)
+
+        	Fuente: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/deployment_guide/s1-networkscripts-interfaces
+
+        	Esta placa, esta enganchada al windows via NAT que corre vmware y por tanto, recibe por el DHCP de la red real la misma ip del windows.
+        	
+        	$ cd /etc/sysconfig/network-scripts/
+
+        	En este lugar se guardan las configuraciones.
+
+        	$ ls    (Debemos observar del listado, los archivos de configuracion que comienzan con ifcfg-xxxx. Vamos a tener uno de estos por cada placa)
+
+        	Si en el punto 2.2 vimos que la placa fue reconocida como eth0, el archivo se debe llamar ifcfg-eth0 y su contenido sera el siguiente:
+
+			NAME=eth0
+			DEVICE="eth0"
+			HWADDR=00:50:56:28:50:EC
+			BOOTPROTO=dhcp
+			ONBOOT="yes"
+			NM_CONTROLLED="yes"  
+
+			Name 			Es lo que aparece en el GUI del Network Manager
+			Device      	Es lo que aparece al hacer ifconfig	
+			HWADDR 			Es la MAC Address de la placa que tambien la podemos visualizar con ifconfig
+			ONBOOT      	La levanta al iniciar
+			NM_CONTROLLED	Permite controlarla desde el Network Manager
+
+		2.4) Reiniciamos el servicios de red y la placa
+
+			$ sudo ifdown eth0
+			$ sudo ifup eth0
+
+			$ sudo service network stop
+			$ sudo service network restart		
+
+			Si todo esta OK, reiniciamos y verificamos que anda todo y que la estacion sale a internet.
+			Podemos apretar ESC al inicio para ir viendo como cargan los servicios al bootear
+
+	3) Agregamos la segunda placa de red
+
+		3.1) Agregamos una segunda placa de Red, la configuramos como NAT y despues la cambiamos a LAN Segment.
+		     Creamos un segment poniendole un nombre. Este segmento actua como Switch a donde conectaremos el server y el cliente.
+			 Generamos una nueva MAC Address para la segunda placa que va en LAN Segment
+
+			Las dos maquinas virtuales quedan configuradas con:
+			1 Placa de Red en Modo NAT para salir a Internet
+			1 Placa de Red en Modo Lan Segment para conectarse entre ellas.
+
+		3.2) Volvemos a repetir los pasos descriptos en el punto 2 para la segunda placa.
+
+			Recordar que en el directorio /etc/sysconfig/network-scripts/ debe quedar un archivo por cada placa y su nombre, 
+			debe respetar lo que muestra el comando ifconfig con el prefijo ifcfg- y seguido el nombre que indica ifconfig
+
+		3.3) Ponemos IP fija a la segunda placa
+
+			Los datos deben ser los siguientes:
+
+			NAME=eth1
+			DEVICE="eth1"
+			HWADDR=00:50:56:25:E6:F7
+			BOOTPROTO="static"
+			IPADDR="192.168.81.136"
+			NETMASK="255.255.255.0" 
+			ONBOOT="yes"
+			NM_CONTROLLED="yes"			
+
+			Recordar cambiar el Name, Device, HWADDR y la Direccion IP
+
+		3.4) Reiniciamos el servicios de red y la placa
+
+			$ sudo ifdown eth1
+			$ sudo ifup eth1
+
+			$ sudo service network stop
+			$ sudo service network restart		
+
+			Si todo esta OK, reiniciamos y verificamos que anda todo y que la estacion sale a internet y hace pin a otra PC
+			Podemos apretar ESC al inicio para ir viendo como cargan los servicios al bootear
+
+
+	4) Cambio del identificador de red (eth0, eth1, etc)
+
+		Cuando ejecutamos ifconfig, linux busca el nombre de la placa en el archivo siguiente:
+
+		/etc/udev/rules.d/70-persistent-net.rules
+
+		Este archivo se genera automaticamente, lleyendo la info de los archivos que generamos en el punto 2.3
+
+		Entonces para cambiar el nombre de los eth de las placas hacemos lo siguiente:
+
+		4.1) Realizamos una copia de seguridad del archivo 70-persistent-net.rules y borramos el original
+
+			$ sudo cp /etc/udev/rules.d/70-persistent-net.rules /etc/udev/rules.d/70-persistent-net.rules.bak
+			$ sudo rm /etc/udev/rules.d/70-persistent-net.rules
+
+			Este archivo se regenerara al reiniciar el equipo.
+
+		4.2) Renombramos los archivos de configuracion y las placas
+
+			$ cd /etc/sysconfig/network-scripts/
+			$ sudo mv ifcfg-eth2 ifcfg-eth0
+			$ sudo vim ifcfg-eth0
+
+			NAME=eth0                 <- Verificar que este numbre coincida con el del archivo
+			DEVICE="eth0"             <- Verificar que este numbre coincida con el del archivo
+			HWADDR=00:50:56:28:50:EC
+			BOOTPROTO=dhcp
+			ONBOOT="yes"
+			NM_CONTROLLED="yes" 			
+
+		4.3) Reiniciamos el equipo
+
+			$ sudo reboot
+
+			Si al reiniciar no levanta internet, verificamos que los archivos siguientes esten correctos con todo lo explciado anteriormente
+
+			ifconfig
+			/etc/udev/rules.d/70-persistent-net.rules
+			/etc/sysconfig/network-scripts/ifcfg-eth0
+
+			Si aun asi no levanta internet, ejecutar:
+
+			$ sudo yum update
+
+			Reiniciar una vez mas
+
+
+
+
+
+
+
+	Apagar Network Manager (Es el la aplicacion de la GUI que maneja las conexiones de red)
+	-----------------------
+
+	Fuente: https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux_OpenStack_Platform/3/html/Installation_and_Configuration_Guide/Disabling_Network_Manager.html
+	
+	Verificar Status del servicio
+	
+	$ sudo chkconfig --list NetworkManager
+	NetworkManager 	0:off	1:off	2:on	3:on	4:on	5:on	6:off
+
+	Cuando todos los run level estan en off, el servicio esta apagado
+
+	Parar el servicio:
+	$ sudo service NetworkManager stop
+
+	Iniciar el Servicio de Red Standard:
+	$ sudo service network start
+
+	Asegurarse que el servicio de red se esta ejecutando:
+	$ sudo chkconfig network on
+
+
+
+
+
+
 SAMBA
 -----
+
+	https://www.samba.org/samba/
+
+	Corre en Linux y permite intercambiar archivos con UINx, LINUX, WINDOWS y MAC, Phones
+
+	Protocolo: CIFS (Common Internet File System - Creado por Microsoft)
+	           CMB  Protocols
+
+    Samba es una implementacion Open source del CIFS de Microsoft
+
+    Lo primero que tenemos que hacer es verificar si samba esta instalado
+    ---------------------------------------------------------------------
+
+    $ sudo yum info samba    (Tiene que decir Installed Packages)
+
+	Loaded plugins: refresh-packagekit, security
+	Installed Packages
+	Name        : samba
+	Arch        : x86_64
+	Version     : 3.6.23
+	Release     : 45.el6_9
+	Size        : 18 M
+	Repo        : installed
+
+    Si no esta instalado lo instalamos:
+    $ sudo yum install samba    
+
+    Para lanzar el servicio ejecutamos:
+    $ sudo /sbin/service smb start        o smb start
+
+	sudo /sbin/service smb start
+	Starting SMB services:                                     [  OK  ]
+
+    Para para el servicio ejecutamos:
+    $ sudo /sbin/service smb stop        o smb stop
+
+    Si no reconoce el comando, quiere decir que el servicio samba no esta instalado
+
+    Samba guarda la configuracion en el siguiente archivo
+    $ cat /etc/samba/smb.conf
+
+    Cada vez que hacemos cambios, debemos reiniciar el servicio de samba con la siguiente instruccion:
+    $ sudo /sbin/service smb restart 
+    
+    Con el siguiente comando reiniciamos el servicio de red
+    $ sudo service network restart
+
+    4) Creamos el directorio a compartir en el Home Share/guest
+
+    $ cd ~
+    $ mkdir Share
+    $ cd Share 
+    $ mkdir admins
+    $ sudo chown root:admin admins/                  (Incluir al grupo users en el grupo permitido de la carpeta guest)
+    $ sudo chmod g=rwx admins/                       (Dar permisos completos a la carpeta guest para los grupos)
+
+ 
+    4) Testear si el archivo de configuracion esta OK de errores
+
+    	$ testparm
+
+
+	4) Hacer que samba se inicie con el sistema 
+
+		$ sudo chkconfig smb on
+
+		cp /etc/samba/smb.conf.ORIGINAL /etc/samba/smb.conf
+
+
+	4) Marcar una carpeta como shareable
+
+		$ chcon -t samba_share_t /pathToFolder
+
+
+    4) Listamos los usuarios
+
+    	$ sudo cat /etc/passwd |grep */bin/bash* |grep *[1][0-9][0-9]* |cut -d: f1
+
+-------------------------------------------------
+
+    Deamons: nmbd, smbd, winbindd
+
+    Testear Parametros: 		$ testparm
+    Levantar Servicio:  		$ sudo /sbin/service smb restart
+    Listar Shares disponibles	$ sudo smbclient -L slserver
+
+    Cambiar Owner				$ chown -R filmico:filmico /export/
+
+    Crear usuario en samba      $ smbpasswd -a filmico
+
+    Resuelve nombre del server? $ sudo nmblookup slserver (Esto Falla)
+
+
+    https://www.samba.org/samba/docs/Samba-HOWTO-Collection.pdf   Pag 84
+
+    \\192.168.0.68

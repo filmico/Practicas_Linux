@@ -2,6 +2,11 @@ Curso
 -----
 https://courses.edx.org
 
+Otro Curso Largbo de Youtube
+-----------------------------
+https://www.youtube.com/watch?v=9t_gJWC32zk
+
+
 Libro gratis con todos los comandos
 -----------------------------------
 http://linuxcommand.org/tlcl.php
@@ -240,6 +245,9 @@ Comandos
 
 21) sudo (Convertir el usuario en Super User) OPCION 1
 
+	Se recomienda leer el punto 21.1) que usa el editor visudo
+
+
 	a) Ir a la consola y fijarse el nombre del usuario  
 	   Supongamos que el usuario es filmico  [filmico@localhost ~]$ 
 
@@ -266,7 +274,9 @@ Comandos
 
 21.1) sudo (Convertir el usuario en Super User) OPCION 2
 
-	$ sudo visudo -f /etc/sudoers
+	$ su               (Lo hacemos como root)
+
+	$ visudo -f /etc/sudoers
 
 	- Vamos a encontrar una linea que dice:
 
@@ -288,6 +298,17 @@ Comandos
 	- Supongamos que tenemos un grupo llamado admin. Para darle permisos de usar sudo a los admins escribiriamos.
 
 	%admin ALL=(ALL) ALL
+
+	- Ahora tenemos que agregar al usuario que querramos al grupo admin y lo convertimos en admin
+
+	$ groupadd admin		               Creamos el grupo admin
+
+	$ usermod -G "admin" filmico           Agregamos a filmico al grupo "admin"
+
+	Reiniciar
+
+	Fuente: https://www.techotopia.com/index.php/Managing_Fedora_Linux_Users_and_Groups
+
 
 	Lo que sigue es un ejemplo largo pero vale la pena para entender mas de los permisos
 	====================================================================================
@@ -1106,8 +1127,309 @@ Comandos
 
 58) Cambiar nombre al PC
 
-	
+	Este texto, se encuentra repetido en el archivo Networking.txt
+
+	Fuente: http://www.labtestproject.com/using_linux/permanently_change_hostname_on_fedora
+
+	Se puede cambiar el nombre del host durante la sesion de consola o de manera permanente
+
+	- Durante la sesion
+		$ hostname subDomain.domain.com     (Version con subdominio y dominio)
+		$ hostname myStation                (Version solo con nombre)
+
+	- Permanente
+		Se debe editar el archivo /etc/sysconfig/network
+
+		1) Primero hacemos una copia
+		$ sudo cp -pr /etc/sysconfig/network /etc/sysconfig/network.bak
+
+		2) Editamos el archivo
+		$ sudo vim /etc/sysconfig/network
+
+		NETWORKING=yes
+		HOSTNAME=localhost.localdomain        (Cambiamos este valor por el nuevo nombre Ej. Server)
+		NTPSERVERARGS=iburst
+
+		3) Verificamos que el cambio surtio efecto y reiniciamos
+
+		$ sudo cat /etc/sysconfig/network
+
+		Nota: No se debe editar el archivo hosts como indica en la mayoria de los links	
 	                
+59) Comando Cut
+
+	Cut, nos permite buscar y quitar columnas de un resultado
+
+	El siguiente ejemplo, lista los usuarios del sistema, cortando las columnas por el :
+	y quedandose con las columnas 1 y 3
+
+	$ sudo cat /etc/passwd |grep /home* |cut -d ':' -f 1,3
+
+	El siguiente ejemplo, lista los usaurios de Samba Network
+
+	$ sudo cat /etc/passwd |grep */bin/bash* |grep *[1][0-9][0-9][0-9]* |cut -d ':' -f 1
+
+
+	Fuente: https://www.computerhope.com/unix/ucut.htm
+			https://www.thegeekstuff.com/2013/06/cut-command-examples/
+
+
+
+60) Administracion de discos
+
+	Para preparar un disco o dispositivo para grabar en el, tenemos que hacer los siguientes pasos
+
+	1) Particionar el Espacio 
+	2) Crear un File System (Formatearlo)
+	3) Montarlo y agregarlo a fstab para que lo monte al inicio
+
+	Los siguientes Paquetes se necesitan para poder leer y escribir en particiones NTFS
+
+	ntfsprogs y ntfs-3g   (ntfs-3g es una dependencia de ntfsprogs)
+
+	Como MBR tiene un tope de 2TB se paso a usar GPT
+	GPT = Guid Partition Table
+	GPT es parte de UEFI (Unified Extensible Framework Interface)
+
+	GPT soporta hasta 128 particiones y 9.4 Zetabytes
+
+	Soft utiles para trabajar con particiones:
+	Tradicionalmente se usaba fdisk pero no se puede usar con particiones GPT salvo que sea una version nueva. 
+	Alternativamente se puede usar parted, gdisk o gparted que es la GUI de parted
+
+	1) Particionar el Espacio 
+
+	PARTED
+	------
+
+	Para remover las particiones del pendrive, debemos verificar que el dispositivo este desmontado
+
+	$ sudo cat /etc/mtab
+
+	Si vemos que existe un sdb1 o un sdb procedemos a desmontarlo ejecutando
+
+	$ sudo umount sdb1
+	$ sudo umount sdb
+
+	Por default el comando "parted" abre tomando el disco de sistema como seleccionado.
+	Debemos cambiar a otro disco usando select como se indica a continuacion.
+
+	$ sudo parted
+	- help 					lista los comandos
+	- print list 			lista todos los dispositivos
+	- select /dev/sdb       Selecciona el disco 2 sdb
+	- print                 Ejecutandolo solo nos muestra info del disco seleccionado
+
+	(parted) select /dev/sdb                                                  
+	Using /dev/sdb
+
+	(parted) print                                                            
+	Model: ADATA USB Flash Drive (scsi)
+	Disk /dev/sdb: 15.5GB
+	Sector size (logical/physical): 512B/512B
+	Partition Table: gpt
+
+	Number  Start   End     Size    File system  Name                  Flags
+	 1      1049kB  15.5GB  15.5GB  ntfs         Basic data partition
+
+	- Tambien podemos ejecutar help seguido del comando y ver mas ayuda
+	- help mkpart
+
+	Creando Particion Tipo Ext2
+	---------------------------
+	(parted) mkpart
+	Partition name?  []? Nombre
+	File system type?  [ext2]?
+	Start? 1                         Dejamos del 0 al 1 mb libre para el boot sector, etc
+	End? 512
+
+
+	(parted) print                                                            
+	Model: ADATA USB Flash Drive (scsi)
+	Disk /dev/sdb: 15.5GB
+	Sector size (logical/physical): 512B/512B
+	Partition Table: gpt
+
+	Number  Start   End     Size    File system  Name                  Flags
+	 2      1048kB  1049kB  512B                 Datos
+	 1      1049kB  15.5GB  15.5GB  ntfs         Basic data partition
+
+	rm 2       borra la particion 2
+	rm 1       borra la particion 1
+
+	La sintaxis de creacion de la particion es la siguiente:
+
+	mkpart PART-TYPE [FS-TYPE] START END 
+ 
+ 	Ejecutamos:
+
+ 	mkpart primary ext4 2048s 100%   (Desde el cilindro 2048 que es el inicio hasta el 100% del pendrive)
+	mkpart primary ext4 0% 100%      (Esto tambien deberia funcionar par dimensionar al 100%)
+
+	Ejemplo:
+
+	(parted) mkpart primary ext4 0% 50%
+	(parted) print
+	Model: ADATA USB Flash Drive (scsi)
+	Disk /dev/sdb: 15.5GB
+	Sector size (logical/physical): 512B/512B
+	Partition Table: gpt
+
+	Number  Start   End     Size    File system  Name     Flags
+	 1      1049kB  7759MB  7758MB  ntfs         primary             Queda la particion de 7.7 GB
+
+                                                     
+	(parted) mkpart secondary ext4 50% 100%                                    
+	(parted) print
+	Model: ADATA USB Flash Drive (scsi)
+	Disk /dev/sdb: 15.5GB
+	Sector size (logical/physical): 512B/512B
+	Partition Table: gpt
+
+	Number  Start   End     Size    File system  Name       Flags
+	 1      1049kB  7759MB  7758MB  ntfs         primary
+	 2      7759MB  15.5GB  7758MB               secondary
+
+	Por Default, las expresiones sin sigla son MegaBytes
+
+	parted) mkpart                                                           
+	Partition name?  []? Test                                                 
+	File system type?  [ext2]?                                                
+	Start? 1
+	End? 512	 								parted entiende 512 como 512 Megabytes
+	(parted) print                                                            
+	Model: ADATA USB Flash Drive (scsi)
+	Disk /dev/sdb: 15.5GB
+	Sector size (logical/physical): 512B/512B
+	Partition Table: gpt
+
+	Number  Start   End    Size   File system  Name  Flags
+	 1      1049kB  512MB  511MB  ntfs         Test
+
+	2) Crear un File System (Formatearlo)
+
+	Una ves que concluimos con la creacion de las particiones, procedemos a Crear el File System o como windows lo llama, formatear las unidades. 
+	Esto nos permite designar el tipo de archivos (Fat32, NTFS, Ext2,3,4, etc)
+
+	El comando mkfs nos permite crear el FS pero debemos indicar que programa especifico queremos correr con la notacion -t
+
+      fs(5),  badblocks(8),  fsck(8),  mkdosfs(8),  mke2fs(8),  mkfs.bfs(8),  mkfs.ext2(8),  mkfs.ext3(8),  mkfs.ext4(8),  mkfs.minix(8),  mkfs.msdos(8),  mkfs.vfat(8),   mkfs.xfs(8),
+       mkfs.xiafs(8)	
+
+	mkfs.vfat 
+		Es el Fat32 de Windows y el que debemos usar para compartir entre win y Linux)
+	
+	mkfs.ext2 
+		Es la version de Linux del Fat32. No es compatible con win y no es journaled. Recomendable para la particion boot en discos mecanicos ya que tiene que leer y escribir menos.
+		La contra de este sistema es que si el equipo se cuelga, al bootear se tiene que chequear el disco entero por falta de journaling.
+	
+	mkfs.ext3 
+		Es una version mejorada y ya cuenta con journaling. Ext3 o NTFS, si bien es un poquito mas pesado en lecturas y escrituras, permite recuperarse mucho mas rapido de un crash ya que no se tiene que chequear track a track del disco para corregir los problemas.
+
+	mkfs.ext4 
+		Es la version mas recomendada. Cuenta con journaling y muchas optimizaciones que incluso previenen la defragmentacion.
+
+	Para ver un manual especifico, ejecutamos:
+
+	$ man mkfs.vfat    
+
+	Ver el listado de particiones y discos disponibles
+	$ sudo fdisk -l |less     o       $ sudo lsblk
+
+	Crear el FS en sdb1 y sdb2:
+	$ sudo mkfs -t ext2 -m 0 -L /boot /dev/sdb1
+	$ sudo mkfs -t ext4 -m 0 -L /usbdrive /dev/sdb2            
+		-t para el tipo 
+		-m 0 para que no reserve espacio para el root
+		-L para ponerle una etiqueta y que se pueda montar por nombre. Ojo que la L va en Mayuscula
+		Al final se tiene que especificar la unidad
+
+	Tener en cuenta al momento de indicar este comando, la ruta a la particion al final ya que podemos llegar por error a indicar por ejemplo sdb en vez de sdb1 y de esta manera estariamos volando todas las particiones para instalar un filesystem en todo el dispositivo y no es lo que queremos.
+
+	$ lsblk
+
+	NAME                        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+	sda                           8:0    0   20G  0 disk 
+	├─sda1                        8:1    0  500M  0 part /boot
+	└─sda2                        8:2    0 19.5G  0 part 
+	  ├─VolGroup-lv_root (dm-0) 253:0    0 17.5G  0 lvm  /
+	  └─VolGroup-lv_swap (dm-1) 253:1    0    2G  0 lvm  [SWAP]
+	sr0                          11:0    1  5.8G  0 rom  /media/"Scientific 6.8 x86_64 DVD-DL"
+	sdb                           8:16   1 14.5G  0 disk 
+	├─sdb1                        8:17   1  190M  0 part 
+	└─sdb2                        8:18   1 14.3G  0 part	
+
+
+
+
+	3) Montarlo y agregarlo a fstab para que lo monte al inicio 
+
+	En linux y a diferencia de windows, debemos crear una carpeta para montar alli el contenido de una unidad. En el caso del Pendrive que acabamos de poner el file system en el punto 2, crearemos una carpeta en el root llamada /keydrive.
+
+	$ sudo mkdir /keydrive
+	$ ls -l /
+	drwxr-xr-x.   2 root    root   4096 Jun 20 12:48 keydrive
+
+	Recordar que debemos cambiar los permisos para que todos los usuarios puedan acceder!
+
+	El comando "mount" nos muestra todos los dispositivos montados
+
+	$ sudo mount -l
+
+	Por lo general los dispositivos aparecen ya montados en el directorio /dev/ como sdb2, sdb3, etc
+
+	Para verificar los dispositivos que ve el equipo y que podemos montar, podemos usar lsblk
+
+	Para montar el dispositivo ejecutamos:
+
+	$ sudo mount /dev/sdb2 /keydrive/
+
+	El siguiente aso es igual pero indica el tipo de particion que estamos montando
+
+	$ sudo mount -t ext4 /dev/sdb2 /keydrive/     (La info del tipo la obtenemos con mount -l)
+
+	Montando de manera permanente un dispositivo
+	--------------------------------------------
+	
+	Para montar unidades de manera que esten disponibles al momento del booteo, debemos editar el archivo /etc/fstab
+
+	fstab a diferencia de la consola, montas los dispositivos con otra sintaxis y necesita de un identificador del disco.
+
+	Existen 3 Maneras de referenciar al dispositivo y se obtienen con el comando block id blkid
+	El resultado muestra el path de dev, el labely el UUID además del tipo
+
+	$ sudo blkid /dev/sdb2
+	/dev/sdb2: LABEL="/usbdrive" UUID="2a445f41-5404-46b5-963e-ffba05e807d8" TYPE="ext4" 
+
+	La ventaja de usar el label o el UUID es que si las letras se corren, por enchufar o desenchufar discos, podemos estar montando el disco equivocado. En cambio, referenciando por LABEL o UUID, no hay manera de equivocarse. Lo mas recomendable es usar el UUID.
+
+	Ahora que tenemos identificado el dispositivo, procedemos a editar fstab agregando el mount al final de todo:
+
+	$ sudo vim /etc/fstab
+
+	UUID=2a445f41-5404-46b5-963e-ffba05e807d8    /keydrive        ext4  defaults       0 2
+
+
+	La syntaxis es la siguiente:
+	Numero UUID         Lugar de montaje     Tipo      default options       0               2
+	                                                   (rw user acces)     dump          orden de chequeo si el sistema hace un crash
+
+    Verificamos que el dispositivo no este montado y testeamos si fstab lo levanta
+
+    $ sudo mount
+    $ sudo mount -a     (-a lee fstab y monta todo lo que indica)
+
+    Si queremos hacer cambios temporales de unidades ya montadas por fstab, no hace falta ni editar el archivo y desmontar la unidad.
+    Podemos usar el comando mount para cambiar el comportamiento on-the-fly
+
+    Cambiamos el dispositivo a read only:
+
+    $ sudo mount -o remount,ro /dev/sdb2 /keydrive
+	
+    Por ultimo, mount tiene parametros muy utiles para montar dispositivos de red.
+    $ man mount muestra el extenso manual de este comando.
+
+    
 
 
 
@@ -1115,4 +1437,49 @@ Comandos
 
 
 
+	Agregados al apartado de Administracion de Dispositivos
+	-------------------------------------------------------
+
+	1) Mostrar Dispositivos
+
+		$ sudo fdisk -l |less
+
+		Esto arroja un listado que comienza con /dev/sda. sda = Serial Ata Disk A o primer disco
+
+		Disk /dev/sda: 21.5 GB, 21474836480 bytes
+
+		Luego vemos abajo las particiones de ese disco, nombradas como sda1, sda2, etc
+
+		   Device Boot      Start         End      Blocks   Id  System
+		/dev/sda1   *           1          64      512000   83  Linux
+		/dev/sda2              64        2611    20458496   8e  Linux LVM
+
+		Como Observamos en el listado que sigue, la particion sda2 con sistema Linux LVM del renglon de arriba, se conforma con dos divisiones logicas de 18GB y 2GB correspondientemente.
+
+		Disk /dev/mapper/VolGroup-lv_root: 18.8 GB, 18798870528 bytes
+		Disk /dev/mapper/VolGroup-lv_swap: 2147 MB, 2147483648 bytes
+
+	2) Ver Particiones. Ojo, no se muestran todas las del disco. Usar Gparted!
+	$ df -h
+
+	C:\Linux Training\Udemy Linux Administration Bootcamp\Linux Administration Bootcamp Go from Beginner to Advanced\06 Disk Management
+
+	C:\Linux Training\Tutoriales\05_Partitions
+
+	3) Ver Dispositivos y Particiones (The Great Way)
+
+		El comando lsblk presente en la mayoria de los linux, nos muestra en consola el diagrama completo de dispositivos.
+
+		$ sudo lsblk
+
+		NAME                        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+		sda                           8:0    0   20G  0 disk 
+		├─sda1                        8:1    0  500M  0 part /boot
+		└─sda2                        8:2    0 19.5G  0 part 
+		  ├─VolGroup-lv_root (dm-0) 253:0    0 17.5G  0 lvm  /
+		  └─VolGroup-lv_swap (dm-1) 253:1    0    2G  0 lvm  [SWAP]
+		sr0                          11:0    1  5.8G  0 rom  /media/"Scientific 6.8 x86_64 DVD-DL"
+		sdb                           8:16   1 14.5G  0 disk 
+		├─sdb1                        8:17   1  190M  0 part 
+		└─sdb2                        8:18   1 14.3G  0 part		
 
