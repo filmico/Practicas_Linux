@@ -1555,3 +1555,50 @@ Comandos
 		$ tar jcvf mydir.tar.bz2 mydir		Create the archive and compress with bz2
 		$ tar Jcvf mydir.tar.xz mydir		Create the archive and compress with xz
 		$ tar xvf mydir.tar.gz				Extract all the files in mydir.tar.gz into the mydir directory. Note you do not have to tell tar it is in gzip format.		
+
+63) Backup
+
+	Se pueden usar los mecanismos de compresion y empaquetado a tar explicados en el punto 62 para realizar backups
+
+	Ejemplo de Backup del home del usuario filmico:
+
+	$ tar -cvf /tmp/backup.tar ~                o      $ tar -cvf /tmp/backup.tar /home/filmico
+
+	Comprimimos con los tres algoritmos para verificar cual es mas efectivo
+
+	$ cd /tmp/
+	$ tar zcf /tmp/backup.tar.gz ~
+	$ tar jcf /tmp/backup.tar.bz2 ~
+	$ tar Jcf /tmp/backup.tar.xz ~	
+
+	$ ls -lh
+	-rw-rw-r--. 1 filmico filmico 296M Jun 26 13:06 backup.tar
+	-rw-rw-r--. 1 filmico filmico 143M Jun 26 13:09 backup.tar.bz2
+	-rw-rw-r--. 1 filmico filmico 150M Jun 26 13:09 backup.tar.gz
+	-rw-rw-r--. 1 filmico filmico 118M Jun 26 13:11 backup.tar.xz
+
+
+64) Editores de texto
+
+	El simbolo > que se usa para indicar la compuerta de salida, se puede usar para crear un archivo
+	El simbolo >> se usa para agregar contenido a un archivo
+
+	$ echo 1st line > myfile.txt
+	$ echo 2nd line >> myfile.txt 
+	$ echo 3nd line >> myfile.txt 
+	$ cat myfile.txt 
+
+	1st line
+	2nd line
+	3nd line
+
+	Editores Basicos
+	----------------
+	nano
+	gedit
+
+	Avanzados
+	---------
+	vi                      vimtutor y help  son comandos que se pueden ejecutar con los dos puntos para mas info :help
+							http://www.openvim.com/
+	emacs
