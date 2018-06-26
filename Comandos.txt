@@ -1602,3 +1602,7 @@ Comandos
 	vi                      vimtutor y help  son comandos que se pueden ejecutar con los dos puntos para mas info :help
 							http://www.openvim.com/
 	emacs
+
+
+	Mid-Level Systems Administrator
+	https://jobs.smartrecruiters.com/MPC/743999669813065-mid-level-systems-administrator?trid=e928b0a1-35d0-456d-82b4-91ba6be64527
